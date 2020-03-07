@@ -58,6 +58,9 @@
 		<input type="text" id="videoID" placeholder="Video ID">
 		<button onclick="getInfoVideo()">Get Info</button>
 	</div>
+	<div>
+		<button style="background-color: green" onclick="clearData()">Clear</button>
+	</div>
 	<table id="data">
 		<tr>
 			<th>Fields</th>
@@ -69,7 +72,7 @@
 <script>
 	var __FB;
 	var __access_token;
-	var tableRef 	= document.getElementById('data').getElementsByTagName('tbody')[0];
+	var tableRef 	= document.getElementById('data').getElementsByTagName('tbody')[1];
   logInWithFacebook = function() {
     FB.login(function(response) {
       if (response.authResponse) {
@@ -185,6 +188,10 @@
 				})
 			}
 	    });
+  }
+
+  function clearData() {
+  	tableRef.innerHTML = "";
   }
 </script>
 </body>
