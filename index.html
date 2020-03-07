@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style>
+
+		input {
+			height: 25px;
+		    width: 30%;
+		    margin-bottom: 10px;
+		    border: 1px solid #ced4da;
+		    padding: .375rem .75rem;
+		    border-radius: 7px;
+		}
+
+		button {
+			height: 36px;
+		    width: auto;
+		    margin-bottom: 10px;
+		    border: 1px solid #ced4da;
+		    border-radius: 7px;
+		    background-color: #0062cc;
+		    color: #fff;
+		    cursor: pointer;
+		}
+#data {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 40%;
+}
+
+#data td, #data th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#data tr:nth-child(even){background-color: #f2f2f2;}
+
+#data tr:hover {background-color: #ddd;}
+
+#data th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
+</style>
+</head>
+<body>
+	<p><a href="#" onClick="logInWithFacebook()">Log In with the JavaScript SDK</a></p>
+	<p id="error" style="font-weight: bold; color: red" hidden>  </p>
+	<div>
+		<input type="text" id="pageID" placeholder="Page ID">
+		<button onclick="getInfoPage()">Get Info</button>
+	</div>
+	<div>
+		<input type="text" id="videoID" placeholder="Video ID">
+		<button onclick="getInfoVideo()">Get Info</button>
+	</div>
+	<table id="data">
+		<tr>
+			<th>Fields</th>
+			<th>Data</th>
+		</tr>
+		<tbody></tbody>
+	</table>
+
+<script>
+	var __FB;
+	var __access_token;
+	var tableRef 	= document.getElementById('data').getElementsByTagName('tbody')[0];
+  logInWithFacebook = function() {
+    FB.login(function(response) {
+      if (response.authResponse) {
+      	document.getElementsByTagName('a')[0].remove();
+      	let pageID = document.getElementById('pageID').removeAttribute("hidden");
+      	let videoID = document.getElementById('videoID').removeAttribute("hidden");
+      	__FB = FB;
+        __access_token = FB.getAuthResponse()['accessToken'];
+   //      var expiresIn =   FB.getAuthResponse()['expiresIn'];
+	  //    let now = new Date();
+		 // let expiryDate = new Date(now.getTime() + expiresIn*1000);
+	  //    console.log('COOL DOWN: ' + (expiryDate - now)/ 1000 + ' s');
+		
+		// Get name Page
+		// FB.api('/1210319635797880', function(response) {
+		// 	if ('error' in response) {
+		// 		var error = document.getElementById("error");
+		// 		error.removeAttribute("hidden");
+		// 		error.innerText = response.error.message;
+		// 	} else {
+		// 		let newRow   = tableRef.insertRow();
+		// 		newRow.insertCell(0).appendChild(document.createTextNode(Object.keys(response)[0]));
+		// 		newRow.insertCell(1).appendChild(document.createTextNode(response.name));
+		// 	}
+	 //    });
+
+	    // Get list video
+	  //   FB.api('/1210319635797880', function(response) {
+			// if ('error' in response) {
+			// 	var error = document.getElementById("error");
+			// 	error.removeAttribute("hidden");
+			// 	error.innerText = response.error.message;
+			// } else {
+			// 	let newRow   = tableRef.insertRow();
+			// 	newRow.insertCell(0).appendChild(document.createTextNode(Object.keys(response)[0]));
+			// 	newRow.insertCell(1).appendChild(document.createTextNode(response.name));
+			// }
+	  //   });
+
+      } else {
+        alert('User cancelled login or did not fully authorize.');
+      }
+    }, {
+		scope: 'manage_pages,publish_pages', 
+		return_scopes: true
+	}
+    );
+    return false;
+  };
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId: '499718920977118',
+      cookie: true, // This is important, it's not enabled by default
+      version: 'v6.0'
+    });
+  };
+
+  (function(d, s, id){
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) {return;}
+    js = d.createElement(s); js.id = id;
+    js.src = "https://connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+
+  function getInfoPage() {
+  	let pageID = document.getElementById('pageID');
+  	if (pageID.value == "") {alert("Page ID Not available"); return};
+  	__FB.api(
+  		pageID.value, 
+  		'GET',
+  		{
+  			'access_token': __access_token
+  		},
+  		function(response) {
+			if ('error' in response) {
+				var error = document.getElementById("error");
+				error.removeAttribute("hidden");
+				error.innerText = response.error.message;
+			} else {
+				let newRow   = tableRef.insertRow();
+				newRow.insertCell(0).appendChild(document.createTextNode("name"));
+				newRow.insertCell(1).appendChild(document.createTextNode(response.name));
+			}
+	    });
+  }
+
+  function getInfoVideo() {
+  	let videoID = document.getElementById('videoID');
+  	if (videoID.value == "") {alert("Page ID Not available"); return};
+  	__FB.api(
+  		videoID.value, 
+  		'GET',
+  		{
+  			"fields": "description,video_insights",
+  			'access_token': __access_token
+  		},
+  		function(response) {
+			if ('error' in response) {
+				var error = document.getElementById("error");
+				error.removeAttribute("hidden");
+				error.innerText = response.error.message;
+			} else {
+				var newRow   = tableRef.insertRow();
+				newRow.insertCell(0).appendChild(document.createTextNode("description"));
+				newRow.insertCell(1).appendChild(document.createTextNode(response.description));
+
+				let videoInsights = response.video_insights.data;
+				[...videoInsights].forEach((ele) => {
+					newRow   = tableRef.insertRow();
+					newRow.insertCell(0).appendChild(document.createTextNode(ele.name));
+					newRow.insertCell(1).appendChild(document.createTextNode(ele.values[0].value));
+				})
+			}
+	    });
+  }
+</script>
+</body>
+</html>
